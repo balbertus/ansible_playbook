@@ -1,0 +1,9 @@
+---
+- name: ME DNS Entry Update
+  hosts: all
+  gather_facts: yes
+  ignore_unreachable: yes
+  become: yes
+
+  roles:
+    - dns_v2

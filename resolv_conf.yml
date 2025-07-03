@@ -1,0 +1,24 @@
+---
+- name: Copy resolv.conf
+  hosts: all
+  tasks:
+    - name: copy local file to local backup
+      become: yes
+      become_user: root
+      copy:
+        src: /etc/resolv.conf
+        dest: /etc/resolv.conf.am2
+        backup: yes
+          
+    - name: "Replace in line nameserver"
+      become: yes
+      become_user: root
+      lineinfile:
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        path: /etc/resolv.conf
+        state: present
+      with_items:
+        - { regexp: 'nameserver 198.147.177.65', line: 'nameserver 10.78.177.53'}
+        - { regexp: 'nameserver 10.78.176.138', line: 'nameserver 10.78.177.73'}
+        - { regexp: 'nameserver 10.78.176.137', line: 'nameserver 10.78.177.74'}  

@@ -1,0 +1,15 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+      - name: Start the service
+        service:
+          name: NetworkManager  
+          state: started
+          enabled: true 
+
+      - name: stop the service
+        service:
+          name: NetworkManager
+          state: stopped
+          enabled: false

@@ -1,0 +1,10 @@
+---
+- name: "Redhat Linux OS Version"
+  hosts: all
+  gather_facts: yes
+  ignore_unreachable: yes
+  #become: yes
+
+  roles:
+    - get_info
+    

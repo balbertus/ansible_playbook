@@ -1,0 +1,9 @@
+---
+- name: ME user and group management
+  hosts: all
+  gather_facts: yes
+  ignore_unreachable: yes
+  become: yes
+
+  roles:
+    - rmusergroup

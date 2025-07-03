@@ -1,0 +1,49 @@
+---
+- hosts: all
+  become: true
+  tasks:
+  - name: Change file permissions
+    file:
+      path: /etc/cron.d/ocsinventory-agent
+      owner: "root"
+      group: "root"
+      mode: '0644'
+  
+  - name: Generate random minute
+    set_fact:
+      random_minute: "{{ 59 | random }}"
+    run_once: yes
+  - debug: var=random_minute
+  
+  - name: Generate random hour
+    set_fact:
+      random_hour: "{{ 23 | random }}"
+    run_once: yes
+  - debug: var=random_hour
+
+  - name: Ensure an old  job is no long present. Removes any Ansible job
+    cron:
+     name: "ocsinventory-agent"
+     minute: "{{ random_minute }}"
+     hour: "{{ random_hour }}"
+     day: "*"
+     month: "*"
+     weekday: "*"
+     job: "/opt/ocsinventory/ocsinventory-agent --lazy > /dev/null 2>&1"
+     state: absent
+     
+  - name: "Cronjob Entry"
+    cron:
+     name: "ocsinventory-agent"
+     minute: "{{ random_minute }}"
+     hour: "{{ random_hour }}"
+     day: "*"
+     month: "*"
+     weekday: "*"
+     job: "/opt/ocsinventory/ocsinventory-agent --lazy > /dev/null 2>&1"
+
+  - name: "Restart service cron, in all cases"
+    service:
+     name: crond
+     pattern: /usr/sbin/crond
+     state: restarted

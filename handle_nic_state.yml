@@ -1,0 +1,13 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    src_prefix: "eth"
+    src_interfaces: "{{ ansible_interfaces | select('match', src_prefix ~ '.*') | sort | list }}"
+  tasks:
+    - name: Debug message
+      debug:
+        var: src_interfaces
+
+    - name: Bring down secondary Interface
+      command: bash -c "ifdown  eth0:1"

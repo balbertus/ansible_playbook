@@ -1,0 +1,52 @@
+---
+- hosts: all
+  gather_facts: yes # Gather facts from all hosts
+  tasks:
+    - name: "Collect facts from reachable hosts"
+      ping:
+      register: ping_result # Register the result of the ping task
+    
+    - name: "Display OS infos of reachable hosts"
+      debug:
+        msg: "OS family: {{ ansible_os_family }} {{ ansible_distribution_major_version }} {{ ansible_distribution_release }} {{ ansible_distribution_version}}"
+      when: ping_result.ping == "pong" # only display facts for reachable hosts
+    
+    - name: "Read a file content"
+      shell: |
+        uname -a
+      register: uname_output # Register the result of shell command task
+    - debug: msg="{{ uname_output.stdout }}"
+
+    - name: "Display uname -a"
+      debug:
+        var: uname_output.stdout_lines
+    
+    - name: "Display uptime"
+      shell: |
+        uptime
+      register: uptime_output
+    - debug: msg="{{ uptime_output.stdout }}"
+
+    - name: "Copy the OS information to a Local File"
+      lineinfile:
+        line: "{{ ansible_os_family }} {{ ansible_distribution_version}} , {{ uname_output.stdout }} , {{ uptime_output.stdout }}"
+        dest: "/tmp/OS_Version_Details.{{ file_format }}"
+        create: true
+      delegate_to: localhost 
+
+    - name: "Sending Email"
+      mail:
+        attach: "/tmp/OS_Version_Details.{{ file_format }}"
+        body: 'Please find the attached Hosts Details .'
+        from: "{{ from_email_id }}"
+        host: localhost
+        subject: 'OS information'
+        to: "{{ to_email_id }}"
+      run_once: true
+      delegate_to: localhost 
+
+    - name: "Delete the Temporary File"
+      shell: |
+        yes | rm /tmp/OS_Version_Details.{{ file_format }}
+      delegate_to: localhost
+      run_once: true

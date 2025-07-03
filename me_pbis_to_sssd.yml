@@ -1,0 +1,9 @@
+---
+- name: ME Pbis to SSSD
+  hosts: all
+  gather_facts: yes
+  ignore_unreachable: yes
+  become: yes
+
+  roles:
+    - pbistosssd

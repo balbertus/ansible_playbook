@@ -1,0 +1,20 @@
+---
+ - name: Creating Random Time 
+   set_fact:
+    random_hour: "{{ 23 | random }}"
+    random_minute: " {{ 59 | random }}"
+ - name: Cron check 
+   shell: crontab -l -u root| grep -i "/opt/ocsinventory/ocsinventory-agent"
+   register: cron_state
+   ignore_errors: yes
+ - name: Ensure for the cron job entry 
+   cron:
+    name: "ocsinventory-agent"
+    minute: "{{ random_minute }}"
+    hour: "{{ random_hour }}"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: "/opt/ocsinventory/ocsinventory-agent --lazy > /dev/null 2>&1"
+    state: present
+   when:  cron_state.stdout == ""

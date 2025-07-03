@@ -1,0 +1,26 @@
+- hosts: all
+  gather_facts: yes
+  tasks:
+  - name: "Populate service facts"
+    service_facts:
+    when: ansible_distribution_major_version == '7'
+  - name: "See the service <dnsmasq> facts as they are"
+    debug:
+      msg: "{{ansible_facts.services['dnsmasq.service'].state}}"
+  - name: "Verify if DNSMASQ is running!"
+    assert:
+      that:
+        - "'{{ansible_facts.services['dnsmasq.service'].state}}' == 'running'"
+      fail_msg: "dnsmasq is down"
+      success_msg: "Don't need to install dnsmasq"
+
+#  - name: "Populate service facts"
+#    service_facts:
+#    when: ansible_distribution_major_version == '6'
+#  - name: "Check service status"
+#      shell: |
+#        service dnsmasq status 
+#    register: service_result # Register the result of service output
+#  - name: "Display dnsmasq status"
+#    debug:
+#      var: service_result.stdout_lines  
