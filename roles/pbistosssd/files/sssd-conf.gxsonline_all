@@ -1,0 +1,54 @@
+[sssd]
+config_file_version = 2
+override_space = ^
+services = nss, pam
+domains = gxsonline.net
+
+[nss]
+enum_cache_timeout = 60
+filter_groups = root
+filter_users = root
+
+[pam]
+pam_id_timeout  = 60
+offline_credentials_expiration = 0
+
+[autofs]
+
+[domain/gxsonline.net]
+enumerate = false
+min_id = 10000
+id_provider = ldap
+auth_provider = ldap
+krb5_realm = GXSONLINE.NET
+ldap_schema = AD
+cache_credentials = true
+ldap_id_mapping = true
+ad_server = all-ad03-p001.idldap.net
+ad_backup_server = all-ad03-p002.idldap.net
+ad_site = ALL
+ldap_search_base = dc=gxsonline,dc=net
+dns_discovery_domain = gxsonline.net
+ldap_uri = ldap://all-ad03-p001.idldap.net,ldap://all-ad03-p002.idldap.net,_srv_
+ldap_default_bind_dn = sssdbind@gxsonline.net
+ldap_default_authtok = AAAgAP3iFbAR0VWQMGj/RIY82BL9ZTCjMiSbPOx9hFUoH8Cgjr0CFKVUnM1JzyVm2Dx6ppJTCCTv0r6epsNiUVt9v7IzOAntTBFRnSKygWWok4C2AAECAw==
+ldap_default_authtok_type = obfuscated_password
+ldap_tls_reqcert = allow
+ldap_tls_cacertdir = /etc/openldap/certs
+ldap_user_object_class = user
+ldap_user_name = sAMAccountName
+ldap_user_principal = userPrincipalName
+ldap_group_object_class = group
+ldap_group_name = cn
+ldap_force_upper_case_realm = true
+ldap_user_objectsid = objectSid
+ldap_group_objectsid = objectSid
+ldap_user_primary_group = primaryGroupID
+ldap_disable_range_retrieval = true
+ignore_group_members = true
+case_sensitive = false
+fallback_homedir = /home/%u
+default_shell = /bin/bash
+ldap_referrals = false
+use_fully_qualified_names = false
+re_expression = (((?P<gxsonline>[^\\]+)\\(?P<name>.+$))|((?P<name>[^@]+)@(?P<gxsonline>.+$))|(^(?P<name>[^@\\]+)$))

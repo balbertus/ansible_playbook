@@ -1,0 +1,21 @@
+---
+# First playbook code that cause parse state at /etc/resolv.conf
+- name: "Do backup of /etc/resolv.conf"
+  shell: |
+    cp -p /etc/resolv.conf /etc/resolv.conf.{{ change }}
+  register: shell_output
+
+- name: "Replace resolv.conf"
+  copy:
+    owner: root
+    group: root
+    mode: 0644
+    src:  'files/resolv.conf.{{ domain }}' # GXSONLINE OR RESLDAP
+    dest: '/etc/resolv.conf'
+  become: yes
+
+- name: "Restart dnsmasq"
+  service:
+    name: dnsmasq
+    pattern: /usr/sbin/dnsmasq
+    state: restarted

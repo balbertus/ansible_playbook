@@ -1,0 +1,133 @@
+---
+# First playbook code that cause parse state at Domain authentication
+- name: "Install sssd package"
+  shell: |
+    yum -y install sssd krb5-workstation samba-common-tools oddjob oddjob-mkhomedir adcli fprintd-pam
+  register: shell_output
+
+- name: "Do backup of /etc/krb5.conf"
+  shell: |
+    cp -p /etc/krb5.conf /etc/krb5.conf.orig.{{ change }}
+  register: shell_output
+
+- name: "Clean up to dev null"
+  shell: |
+    cp -p /dev/null /etc/krb5.conf
+  register: shell_output
+
+- name: "Replace sssd.conf"
+  copy:
+    owner: root
+    group: root
+    mode: 0600
+    src:  'files/sssd-conf.{{ domain_local }}' # GXSONLINE OR RESLDAP
+    dest: '/etc/sssd/sssd.conf'
+  become: yes
+
+- name: "Replace krb5.conf"
+  copy:
+    owner: root
+    group: root
+    mode: 0644
+    src:  'files/sssd-krb5.{{ domain_local }}' # GXSONLINE OR RESLDAP
+    dest: '/etc/krb5.conf'
+  become: yes
+
+- name: "Replace chrony.conf"
+  copy:
+    owner: root
+    group: root
+    mode: 0644
+    src:  'files/chrony.{{ local }}' # GXSONLINE OR RESLDAP
+    dest: '/etc/chrony.conf'
+  become: yes
+
+- name: "Restart chronyd"
+  service:
+    name: chronyd
+    #pattern: /usr/sbin/chronyd
+    enabled: true
+    state: restarted  
+
+- name: "Move ldpap and openldap to old"
+  shell: |
+    mv /etc/openldap/ldap.conf /etc/openldap/pbis_old_ldap.conf, mv /etc/openldap/openldap.conf /etc/openldap/pbis_old_openldap.conf
+  register: shell_output
+  tags:
+    - never
+
+- name: "Restart dnsmasq"
+  service:
+    name: dnsmasq
+    #pattern: /usr/sbin/dnsmasq
+    enabled: true
+    state: restarted
+
+- name: "Replace sssd user format at sudoers"
+  lineinfile:
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    path: /etc/sudoers
+    state: present
+  with_items:
+    - { regexp: '^%domain^users ALL=(ALL) ALL', line: '# BN Systems and Applications User Access'}
+    - { regexp: '^%GXSONLINE[^\\]domain^users ALL=(ALL) ALL', line: 'User_Alias DL_ANX = %sudo_gg_anx_syseng'}
+    - { regexp: '^%IDLDAP[^\\]domain^users ALL=(ALL) ALL', line: 'DL_ANX ALL=(ALL) ALL'}
+    - { regexp: '^%RESLDAP[^\\]domain^users ALL=(ALL) ALL', line: 'DL_SYSENG ALL=(ALL) ALL'}
+    
+- name: "Add sssd user format at sudoers"
+  lineinfile:
+    line: "{{ item.line }}"
+    path: /etc/sudoers
+    state: present
+  with_items:
+    - { line: 'DL_APPENG ALL=(ALL) ALL'}
+    - { line: 'DL_DOMAIN ALL=(ALL) ALL'}
+    - { line: 'otadmin ALL=(root) ALL'}
+
+- name: "update authconfig"
+  shell: |
+    authconfig --enablesssd --enablesssdauth --enablemkhomedir --updateall
+  register: shell_output
+
+- name: "/home/USER Change Ownership:"
+  shell: |
+    for x in $(ls -l /home/|grep  1344799233 |awk '{print $9}'); do chown -R $x:domain^users /home/$x;done
+  register: shell_output
+
+- name: "Remove SVC_ACCOUNTS that do not have Domain^Users for the groups"
+  shell: |
+    rm -rf /home/svc_udprobex?? /home/svc_vascanner/
+  register: shell_output
+
+#- name: "Enable and start sssd"
+#  service:
+#    name: sssd
+#    #pattern: /usr/sbin/sssd
+#    enabled: true
+#    state: restarted
+
+#- name: "Enable and Start oddjobd"
+#  service:
+#    name: oddjobd
+#    #pattern: /usr/sbin/dnsmasq
+#    enabled: true
+#    state: restarted
+
+- name: "Leave the Domain by pbis"
+  shell: |
+    /opt/pbis/bin/domainjoin-cli leave
+  register: shell_output
+
+- name: "stop and disable pbis"
+  service:
+    name: lwsmd
+    #pattern: /usr/sbin/lwsmd
+    state: stopped
+    enabled: false
+
+- name: "purge pbis"
+  shell: |
+    /opt/pbis/bin/uninstall.sh purge
+  register: shell_output
+

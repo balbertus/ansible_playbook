@@ -1,0 +1,43 @@
+---
+- name: "Check OS Version"
+  shell: cat /etc/redhat-release
+  register: os_version
+- debug: msg="{{ os_version.stdout }}"
+
+- name: "Check Kernel Version"
+  shell: uname -r
+  register: kern_version
+- debug: msg="{{ kern_version.stdout }}"
+    
+- name: "Gather Host Name"
+  shell: echo $HOSTNAME
+  register: host_name
+
+- name: "Get uptime"
+  shell: uptime
+  register: os_uptime
+- debug: msg="{{ os_uptime.stdout }}"
+
+- name: "Copy the OS information to a Local File"
+  lineinfile:
+    line: "{{ host_name.stdout }} , {{ os_version.stdout }} , {{ kern_version.stdout }} , {{ os_uptime.stdout }}"
+    dest: "/tmp/OS_Version_Details.{{ file_format }}"
+    create: true
+  delegate_to: localhost 
+
+- name: "Sending Email"
+  mail:
+   attach: "/tmp/OS_Version_Details.{{ file_format }}"
+   body: 'Please find the attached Hosts Details .'
+   from: "{{ from_email_id }}"
+   host: localhost
+   subject: 'OS information'
+   to: "{{ to_email_id }}"
+  run_once: true
+  delegate_to: localhost 
+
+- name: "Delete the Temporary File"
+  shell: |
+    yes | rm /tmp/OS_Version_Details.{{ file_format }}
+  delegate_to: localhost
+  run_once: true

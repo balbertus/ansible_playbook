@@ -1,0 +1,13 @@
+---
+# Remove user and group
+- name: Remove the user otvault 
+  user:
+    name: otvault
+    state: absent
+    remove: yes
+
+#- name: remove the user called otvault
+#  group:
+#    name: 1stack
+#    gid: 2397
+#    state: present

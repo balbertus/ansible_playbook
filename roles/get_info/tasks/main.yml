@@ -1,0 +1,2 @@
+---
+- include: get_OS_version.yml

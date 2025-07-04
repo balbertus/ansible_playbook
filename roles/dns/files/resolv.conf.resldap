@@ -1,0 +1,7 @@
+domain resldap.net
+search resldap.net gxsonline.net
+nameserver 127.0.0.1
+nameserver 10.78.177.53
+nameserver 10.78.177.73
+nameserver 10.78.177.74
+options timeout:1 attempts:2

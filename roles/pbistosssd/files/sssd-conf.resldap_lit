@@ -1,0 +1,92 @@
+[sssd]
+config_file_version = 2
+override_space = ^
+services = nss, pam
+domains = resldap.net, idldap.net
+
+[nss]
+enum_cache_timeout = 60
+filter_groups = root
+filter_users = root
+
+[pam]
+pam_id_timeout  = 60
+offline_credentials_expiration = 0
+
+[autofs]
+
+[domain/resldap.net]
+enumerate = false
+min_id = 10000
+id_provider = ldap
+auth_provider = ldap
+krb5_realm = RESLDAP.NET
+ldap_schema = AD
+cache_credentials = true
+ldap_id_mapping = true
+ad_server = lit-ad04-p001.resldap.net
+ad_backup_server = lit-ad04-p002.resldap.net
+ad_site = LIT
+ldap_search_base = dc=resldap,dc=net
+dns_discovery_domain = resldap.net
+ldap_uri = ldap://lit-ad04-p001.resldap.net,ldap://lit-ad04-p002.resldap.net,_srv_
+ldap_default_bind_dn = sssdbind@resldap.net
+ldap_default_authtok = AAAgAAvM2NtbNeKc28jq6vGHwryuSVS7fyUwTBmn9IErYiuLrz8NS5mM6G6Dj8ze+TpgCBIbXdN8UqXmZNY/AhgcPgOdyDQBxCMwD92IL59rU8FHAAECAw==
+ldap_default_authtok_type = obfuscated_password
+ldap_tls_reqcert = allow
+ldap_tls_cacertdir = /etc/openldap/certs
+ldap_user_object_class = user
+ldap_user_name = sAMAccountName
+ldap_user_principal = userPrincipalName
+ldap_group_object_class = group
+ldap_group_name = cn
+ldap_force_upper_case_realm = true
+ldap_user_objectsid = objectSid
+ldap_group_objectsid = objectSid
+ldap_user_primary_group = primaryGroupID
+ldap_disable_range_retrieval = true
+ignore_group_members = true
+case_sensitive = false
+fallback_homedir = /home/%d/%u
+default_shell = /bin/bash
+ldap_referrals = false
+use_fully_qualified_names = false
+re_expression = (((?P<resldap>[^\\]+)\\(?P<name>.+$))|((?P<name>[^@]+)@(?P<resldap>.+$))|(^(?P<name>[^@\\]+)$))
+
+[domain/idldap.net]
+enumerate = false
+min_id = 10000
+id_provider = ldap
+auth_provider = ldap
+krb5_realm = IDLDAP.NET
+ldap_schema = AD
+cache_credentials = true
+ldap_id_mapping = true
+ad_server = lit-ad03-p001.idldap.net
+ad_backup_server = lit-ad03-p002.idldap.net
+ad_site = LIT
+ldap_search_base = dc=idldap,dc=net
+dns_discovery_domain = idldap.net
+ldap_uri = ldap://lit-ad03-p001.idldap.net,ldap://lit-ad03-p002.idldap.net,_srv_
+ldap_default_bind_dn = sssdbind@idldap.net
+ldap_default_authtok = AAAgAP3iFbAR0VWQMGj/RIY82BL9ZTCjMiSbPOx9hFUoH8Cgjr0CFKVUnM1JzyVm2Dx6ppJTCCTv0r6epsNiUVt9v7IzOAntTBFRnSKygWWok4C2AAECAw==
+ldap_default_authtok_type = obfuscated_password
+ldap_tls_reqcert = allow
+ldap_tls_cacertdir = /etc/openldap/certs
+ldap_user_object_class = user
+ldap_user_name = sAMAccountName
+ldap_user_principal = userPrincipalName
+ldap_group_object_class = group
+ldap_group_name = cn
+ldap_force_upper_case_realm = true
+ldap_user_objectsid = objectSid
+ldap_group_objectsid = objectSid
+ldap_user_primary_group = primaryGroupID
+ldap_disable_range_retrieval = true
+ignore_group_members = true
+case_sensitive = false
+fallback_homedir = /home/%u
+default_shell = /bin/bash
+ldap_referrals = false
+use_fully_qualified_names = false
+re_expression = (((?P<idldap>[^\\]+)\\(?P<name>.+$))|((?P<name>[^@]+)@(?P<idldap>.+$))|(^(?P<name>[^@\\]+)$))

@@ -1,0 +1,28 @@
+# To opt out of the system crypto-policies configuration of krb5, remove the
+# symlink at /etc/krb5.conf.d/crypto-policies which will not be recreated.
+includedir /etc/krb5.conf.d/
+
+[logging]
+    default = FILE:/var/log/krb5libs.log
+    kdc = FILE:/var/log/krb5kdc.log
+    admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+ default_realm = RESLDAP.NET
+ dns_lookup_realm = true
+ dns_lookup_kdc = true
+ ticket_lifetime = 24h
+ renew_lifetime = 7d
+ rdns = false
+ forwardable = true
+
+[realms]
+ RESLDAP.NET = {
+  kdc = all-ad04-p002.resldap.net
+  kdc = all-ad04-p001.resldap.net
+  admin_server = all-ad04-p002.resldap.net
+  admin_server = all-ad04-p001.resldap.net
+ }
+[domain_realm]
+ .RESLDAP.NET = RESLDAP.NET
+ RESLDAP.NET = RESLDAP.NET

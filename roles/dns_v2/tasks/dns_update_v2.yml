@@ -1,0 +1,29 @@
+---
+- name: "Creating a resolv.conf file"
+  file:
+    path: "/tmp/resolv.conf"
+    state: touch
+    mode: 0644
+    owner: root
+    group: root
+
+- name: "Add content to /tmp/resolv.conf"
+  lineinfile:
+    path: "/tmp/resolv.conf"
+    line: "{{ item }}"
+    create: yes
+    state: present
+  with_items:
+    - "domain gxsonline.net"
+    - "search gxsonline.net resldap.net"
+    - "nameserver 127.0.0.1"
+    - "nameserver 10.78.177.53"
+    - "nameserver 10.78.177.73"
+    - "nameserver 10.78.177.74"
+    - "options timeout:1 attempts:2"
+  become: yes
+
+- name: "Do backup of /etc/resolv.conf"
+  shell: |
+    cp -p /etc/resolv.conf /etc/resolv.conf.{{ change }}
+  register: shell_output

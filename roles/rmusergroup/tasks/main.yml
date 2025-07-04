@@ -1,0 +1,2 @@
+---
+- include: remove_user_group.yml
